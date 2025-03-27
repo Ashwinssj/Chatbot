@@ -67,6 +67,10 @@ if "app_key" in st.session_state:
             message_placeholder = st.empty()
             message_placeholder.markdown("Thinking...")
             try:
+                if chat is None:
+                    st.error("Chat session not initialized. Please check your API key.")
+                    return
+                
                 full_response = ""
                 response = chat.send_message(prompt, 
                                           stream=True,
@@ -84,8 +88,10 @@ if "app_key" in st.session_state:
                             word_count = 0
                             random_int = random.randint(5, 10)
                 message_placeholder.markdown(full_response)
+                # Only update history if chat is properly initialized
+                if chat is not None:
+                    st.session_state.history = chat.history
             except genai.types.generation_types.BlockedPromptException as e:
                 st.exception(e)
             except Exception as e:
                 st.error(f"Error generating response: {str(e)}")
-            st.session_state.history = chat.history
