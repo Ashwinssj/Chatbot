@@ -22,25 +22,33 @@ st.caption("a chatbot, powered by google gemini pro.")
 if "app_key" not in st.session_state:
     app_key = st.text_input("Your Gemini App Key", type='password')
     if app_key:
-        st.session_state.app_key = app_key
+        try:
+            # Test the API key before saving
+            genai.configure(api_key=app_key)
+            model = genai.GenerativeModel('gemini-pro')
+            # Try a simple generation to validate the key
+            response = model.generate_content("Test")
+            st.session_state.app_key = app_key
+        except Exception as e:
+            st.error("Invalid API key. Please check your key and try again.")
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
 try:
-    genai.configure(api_key=st.session_state.app_key)
-    model = genai.GenerativeModel(model_name='gemini-pro',
-                                generation_config={
-                                    'temperature': 0.9,
-                                    'top_p': 1,
-                                    'top_k': 1,
-                                    'max_output_tokens': 2048,
-                                })
-    chat = model.start_chat(history=st.session_state.history,
-                          generation_config=model.generation_config)
-except AttributeError as e:
-    st.warning("Please Put Your Gemini App Key First.")
-    chat = None
+    if "app_key" not in st.session_state:
+        chat = None
+    else:
+        genai.configure(api_key=st.session_state.app_key)
+        model = genai.GenerativeModel(model_name='gemini-pro',
+                                    generation_config={
+                                        'temperature': 0.9,
+                                        'top_p': 1,
+                                        'top_k': 1,
+                                        'max_output_tokens': 2048,
+                                    })
+        chat = model.start_chat(history=st.session_state.history,
+                              generation_config=model.generation_config)
 except Exception as e:
     st.error(f"Error initializing Gemini: {str(e)}")
     chat = None
