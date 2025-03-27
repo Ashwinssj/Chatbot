@@ -69,27 +69,24 @@ if "app_key" in st.session_state:
             try:
                 if chat is None:
                     st.error("Chat session not initialized. Please check your API key.")
-                    return
-                
-                full_response = ""
-                response = chat.send_message(prompt, 
-                                          stream=True,
-                                          safety_settings=SAFETY_SETTTINGS,
-                                          generation_config=model.generation_config)
-                for chunk in response:
-                    word_count = 0
-                    random_int = random.randint(5, 10)
-                    for word in chunk.text:
-                        full_response += word
-                        word_count += 1
-                        if word_count == random_int:
-                            time.sleep(0.05)
-                            message_placeholder.markdown(full_response + "_")
-                            word_count = 0
-                            random_int = random.randint(5, 10)
-                message_placeholder.markdown(full_response)
-                # Only update history if chat is properly initialized
-                if chat is not None:
+                else:
+                    full_response = ""
+                    response = chat.send_message(prompt, 
+                                              stream=True,
+                                              safety_settings=SAFETY_SETTTINGS,
+                                              generation_config=model.generation_config)
+                    for chunk in response:
+                        word_count = 0
+                        random_int = random.randint(5, 10)
+                        for word in chunk.text:
+                            full_response += word
+                            word_count += 1
+                            if word_count == random_int:
+                                time.sleep(0.05)
+                                message_placeholder.markdown(full_response + "_")
+                                word_count = 0
+                                random_int = random.randint(5, 10)
+                    message_placeholder.markdown(full_response)
                     st.session_state.history = chat.history
             except genai.types.generation_types.BlockedPromptException as e:
                 st.exception(e)
