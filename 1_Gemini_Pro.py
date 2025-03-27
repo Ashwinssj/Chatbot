@@ -24,14 +24,8 @@ if "app_key" not in st.session_state:
     if app_key:
         try:
             genai.configure(api_key=app_key)
-            # Use the specific model version
-            model = genai.GenerativeModel(model_name='gemini-1.0-pro',
-                                        generation_config={
-                                            'temperature': 0.9,
-                                            'top_p': 1,
-                                            'top_k': 1,
-                                            'max_output_tokens': 2048,
-                                        })
+            # Use the standard model name
+            model = genai.GenerativeModel('gemini-pro')
             response = model.generate_content("Test")
             response.text
             st.session_state.app_key = app_key
@@ -49,15 +43,8 @@ try:
         chat = None
     else:
         genai.configure(api_key=st.session_state.app_key)
-        model = genai.GenerativeModel(model_name='gemini-1.0-pro',
-                                    generation_config={
-                                        'temperature': 0.9,
-                                        'top_p': 1,
-                                        'top_k': 1,
-                                        'max_output_tokens': 2048,
-                                    })
-        chat = model.start_chat(history=st.session_state.history,
-                              generation_config=model.generation_config)
+        model = genai.GenerativeModel('gemini-pro')
+        chat = model.start_chat(history=st.session_state.history)
 except Exception as e:
     st.error(f"Error initializing Gemini: {str(e)}")
     chat = None
