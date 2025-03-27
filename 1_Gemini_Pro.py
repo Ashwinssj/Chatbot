@@ -1,5 +1,3 @@
-
-
 import google.generativeai as genai
 import streamlit as st
 import time
@@ -25,7 +23,7 @@ if "app_key" not in st.session_state:
         try:
             genai.configure(api_key=app_key)
             # Use the standard model name
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('gemini-2.5-pro-exp-03-25')
             response = model.generate_content("Test")
             response.text
             st.session_state.app_key = app_key
@@ -43,7 +41,7 @@ try:
         chat = None
     else:
         genai.configure(api_key=st.session_state.app_key)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-pro-exp-03-25')
         chat = model.start_chat(history=st.session_state.history)
 except Exception as e:
     st.error(f"Error initializing Gemini: {str(e)}")
@@ -75,10 +73,16 @@ if "app_key" in st.session_state:
                     st.error("Chat session not initialized. Please check your API key.")
                 else:
                     full_response = ""
+                    generation_config = {
+                        'temperature': 0.9,
+                        'top_p': 1,
+                        'top_k': 1,
+                        'max_output_tokens': 2048,
+                    }
                     response = chat.send_message(prompt, 
                                               stream=True,
                                               safety_settings=SAFETY_SETTTINGS,
-                                              generation_config=model.generation_config)
+                                              generation_config=generation_config)
                     for chunk in response:
                         word_count = 0
                         random_int = random.randint(5, 10)
