@@ -1,3 +1,5 @@
+
+
 import google.generativeai as genai
 import streamlit as st
 import time
@@ -38,22 +40,22 @@ try:
                           generation_config=model.generation_config)
 except AttributeError as e:
     st.warning("Please Put Your Gemini App Key First.")
+    chat = None
 except Exception as e:
     st.error(f"Error initializing Gemini: {str(e)}")
-
-# Remove the duplicate model and chat initialization
-# model = genai.GenerativeModel('gemini-pro')
-# chat = model.start_chat(history = st.session_state.history)
+    chat = None
 
 with st.sidebar:
     if st.button("Clear Chat Window", use_container_width = True, type="primary"):
         st.session_state.history = []
         st.rerun()
-    
-for message in chat.history:
-    role = "assistant" if message.role == "model" else message.role
-    with st.chat_message(role):
-        st.markdown(message.parts[0].text)
+
+# Add check for chat initialization
+if chat is not None:
+    for message in chat.history:
+        role = "assistant" if message.role == "model" else message.role
+        with st.chat_message(role):
+            st.markdown(message.parts[0].text)
 
 if "app_key" in st.session_state:
     if prompt := st.chat_input(""):
