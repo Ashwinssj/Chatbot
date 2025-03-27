@@ -20,17 +20,21 @@ st.caption("a chatbot, powered by google gemini pro.")
 
 
 if "app_key" not in st.session_state:
-    app_key = st.text_input("Your Gemini App Key", type='password')
+    app_key = st.text_input("Your Gemini App Key", type='password', help="Enter your API key from Google AI Studio (https://makersuite.google.com/app/apikey)")
     if app_key:
         try:
             # Test the API key before saving
             genai.configure(api_key=app_key)
             model = genai.GenerativeModel('gemini-pro')
-            # Try a simple generation to validate the key
-            response = model.generate_content("Test")
+            # Try a simple generation to validate the key with safety settings
+            response = model.generate_content("Test", safety_settings=SAFETY_SETTTINGS)
+            response.text  # This will raise an exception if the response is invalid
             st.session_state.app_key = app_key
+            st.success("API key validated successfully!")
+            st.rerun()  # Rerun the app to initialize chat with the new key
         except Exception as e:
-            st.error("Invalid API key. Please check your key and try again.")
+            st.error(f"API key validation failed. Error: {str(e)}")
+            st.info("Make sure you're using the API key from Google AI Studio and it has access to the Gemini Pro model.")
 
 if "history" not in st.session_state:
     st.session_state.history = []
