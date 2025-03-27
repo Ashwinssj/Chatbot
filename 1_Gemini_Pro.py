@@ -1,5 +1,3 @@
-
-
 import google.generativeai as genai
 import streamlit as st
 import time
@@ -29,7 +27,6 @@ if "history" not in st.session_state:
 
 try:
     genai.configure(api_key=st.session_state.app_key)
-    # Add model configuration
     model = genai.GenerativeModel(model_name='gemini-pro',
                                 generation_config={
                                     'temperature': 0.9,
@@ -37,7 +34,8 @@ try:
                                     'top_k': 1,
                                     'max_output_tokens': 2048,
                                 })
-    chat = model.start_chat(history=st.session_state.history)
+    chat = model.start_chat(history=st.session_state.history,
+                          generation_config=model.generation_config)
 except AttributeError as e:
     st.warning("Please Put Your Gemini App Key First.")
 except Exception as e:
@@ -68,7 +66,11 @@ if "app_key" in st.session_state:
             message_placeholder.markdown("Thinking...")
             try:
                 full_response = ""
-                for chunk in chat.send_message(prompt, stream=True, safety_settings = SAFETY_SETTTINGS):
+                response = chat.send_message(prompt, 
+                                          stream=True,
+                                          safety_settings=SAFETY_SETTTINGS,
+                                          generation_config=model.generation_config)
+                for chunk in response:
                     word_count = 0
                     random_int = random.randint(5, 10)
                     for word in chunk.text:
@@ -83,5 +85,5 @@ if "app_key" in st.session_state:
             except genai.types.generation_types.BlockedPromptException as e:
                 st.exception(e)
             except Exception as e:
-                st.exception(e)
+                st.error(f"Error generating response: {str(e)}")
             st.session_state.history = chat.history
