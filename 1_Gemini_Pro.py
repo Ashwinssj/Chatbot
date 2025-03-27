@@ -23,15 +23,20 @@ if "app_key" not in st.session_state:
     app_key = st.text_input("Your Gemini App Key", type='password', help="Enter your API key from Google AI Studio (https://makersuite.google.com/app/apikey)")
     if app_key:
         try:
-            # Test the API key before saving
             genai.configure(api_key=app_key)
-            model = genai.GenerativeModel('gemini-pro')
-            # Try a simple generation to validate the key with safety settings
-            response = model.generate_content("Test", safety_settings=SAFETY_SETTTINGS)
-            response.text  # This will raise an exception if the response is invalid
+            # Use the specific model version
+            model = genai.GenerativeModel(model_name='gemini-1.0-pro',
+                                        generation_config={
+                                            'temperature': 0.9,
+                                            'top_p': 1,
+                                            'top_k': 1,
+                                            'max_output_tokens': 2048,
+                                        })
+            response = model.generate_content("Test")
+            response.text
             st.session_state.app_key = app_key
             st.success("API key validated successfully!")
-            st.rerun()  # Rerun the app to initialize chat with the new key
+            st.rerun()
         except Exception as e:
             st.error(f"API key validation failed. Error: {str(e)}")
             st.info("Make sure you're using the API key from Google AI Studio and it has access to the Gemini Pro model.")
@@ -44,7 +49,7 @@ try:
         chat = None
     else:
         genai.configure(api_key=st.session_state.app_key)
-        model = genai.GenerativeModel(model_name='gemini-pro',
+        model = genai.GenerativeModel(model_name='gemini-1.0-pro',
                                     generation_config={
                                         'temperature': 0.9,
                                         'top_p': 1,
