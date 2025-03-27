@@ -28,12 +28,24 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 try:
-    genai.configure(api_key = st.session_state.app_key)
+    genai.configure(api_key=st.session_state.app_key)
+    # Add model configuration
+    model = genai.GenerativeModel(model_name='gemini-pro',
+                                generation_config={
+                                    'temperature': 0.9,
+                                    'top_p': 1,
+                                    'top_k': 1,
+                                    'max_output_tokens': 2048,
+                                })
+    chat = model.start_chat(history=st.session_state.history)
 except AttributeError as e:
     st.warning("Please Put Your Gemini App Key First.")
+except Exception as e:
+    st.error(f"Error initializing Gemini: {str(e)}")
 
-model = genai.GenerativeModel('gemini-pro')
-chat = model.start_chat(history = st.session_state.history)
+# Remove the duplicate model and chat initialization
+# model = genai.GenerativeModel('gemini-pro')
+# chat = model.start_chat(history = st.session_state.history)
 
 with st.sidebar:
     if st.button("Clear Chat Window", use_container_width = True, type="primary"):
